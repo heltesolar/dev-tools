@@ -4,6 +4,7 @@ namespace Helte\DevTools\Helpers;
 
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
+use Helte\DevTools\Helpers\Regex;
 
 class StringHelper {
     const ACCENTS_TO_ASCII_MAP = [
@@ -61,19 +62,6 @@ class StringHelper {
 
     /**
      * en-us:
-     * Get unicode characters with accents.
-     * 
-     * pt-br:
-     * Retorna caracteres unicode com acentos.
-     * 
-     * @return array<string>
-     */
-    private static function getCharsWithAccents() {
-        return array_keys(static::ACCENTS_TO_ASCII_MAP);
-    }
-
-    /**
-     * en-us:
      * Casts string to array.
      * 
      * pt-br:
@@ -93,13 +81,11 @@ class StringHelper {
      * pt-br:
      * Substitui acentos por seu caractere ascii correspondente.
      * 
-     * @param string $text
+     * @param  string  $text
      * @return string
      */
-    public static function replaceAccents($text) {
-        return collect(static::toArray($text))
-                    ->map(fn ($char) => self::ACCENTS_TO_ASCII_MAP[$char] ?? $char)
-                    ->join('');
+    public static function replaceAccents(string $text) {
+        return strtr($text, self::ACCENTS_TO_ASCII_MAP);
     }
 
     /**
@@ -209,7 +195,7 @@ class StringHelper {
      * @return string
      */
     public static function shortenSpaces($text) {
-        return Regex::replace('/ +/', ' ', $text);
+        return Regex::replace('/\s+/', ' ', $text);
     }
 
     /**
@@ -304,6 +290,29 @@ class StringHelper {
     }
 
     /**
+     * Split reverso.
+     * 
+     * @param  string  $string
+     * @param  string  $separator
+     * @param  int  $limit
+     * @return array
+     */
+    public static function splitReverse(string $string, string $separator, int $limit) {
+        $parts = explode($separator, $string);
+
+        if ($limit <= 0 || $limit >= count($parts)) {
+            return $parts;
+        }
+
+        $index = count($parts) - $limit + 1;
+        $initial_part = array_slice($parts, 0, $index);
+        $initial_part_joined = implode($separator, $initial_part);
+        $remaining_parts = array_slice($parts, $index);
+
+        return [$initial_part_joined, ...$remaining_parts];
+    }
+
+    /**
      * Tenta extrair um número de uma string.
      * 
      * @param string $string
@@ -321,5 +330,18 @@ class StringHelper {
         }
 
         return (int) ($match[1]);
+    }
+
+    /**
+     * en-us:
+     * Get unicode characters with accents.
+     * 
+     * pt-br:
+     * Retorna caracteres unicode com acentos.
+     * 
+     * @return array<string>
+     */
+    private static function getCharsWithAccents() {
+        return array_keys(static::ACCENTS_TO_ASCII_MAP);
     }
 }
