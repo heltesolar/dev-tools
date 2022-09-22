@@ -102,7 +102,7 @@ class PalletService{
             }
         }
 
-        return ((float)($total_area/1000000));
+        return ((float)($total_area/10000));
     }
 
     private function renderPalletsData($pallets){
