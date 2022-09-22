@@ -8,7 +8,8 @@ use Helte\DevTools\Models\Pallet;
 class PalletService{
 
     public function calculatePalletsData($product_id,$pallets_data, $qtd){
-        if(in_array(0, $pallets_data) || in_array(null,$pallets_data)){
+        $pallets_data = ['full'=>31,'truncated'=> 21,'half'=>16,'quarter'=>11];
+        if(is_null($pallets_data) || in_array(0, $pallets_data) || in_array(null,$pallets_data)){
             throw new InvalidPalletData($product_id, $pallets_data);
         }
         $pallets = $this->countByPallet($pallets_data, $qtd);
