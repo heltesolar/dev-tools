@@ -2,14 +2,14 @@
 
 namespace Helte\DevTools\Services;
 
-use Helte\DevTools\Exceptions\InvalidPalletData;
+use Exception;
 use Helte\DevTools\Models\Pallet;
 
 class PalletService{
 
     public function calculatePalletsData($product_id,$pallets_data, $qtd){
         if(is_null($pallets_data) || in_array(0, $pallets_data) || in_array(null,$pallets_data)){
-            throw new InvalidPalletData($product_id, $pallets_data);
+            throw new Exception('Pallets Data inválido em produto: '.$product_id);
         }
         $pallets = $this->countByPallet($pallets_data, $qtd);
 
@@ -111,5 +111,4 @@ class PalletService{
             return [$pallet->name => $pallet->qtd ?? 0];
         });
     }
-
 }
