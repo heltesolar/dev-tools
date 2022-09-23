@@ -26,14 +26,17 @@ class LogisticService {
         $this->checkPalletsTrait();
 
         $data = $this->logistic_object->calculatePalletsData();
-
-        if($this->should_save){
-            $this->logistic_object->pallets_data = $data['data'];
-            $this->logistic_object->area_pallets = $data['area'];
-            $this->logistic_object->save();
+        if($data){
+            if($this->should_save){
+                $this->logistic_object->pallets_data = $data['data'];
+                $this->logistic_object->area_pallets = $data['area'];
+                $this->logistic_object->save();
+            }
+    
+            return $data;
         }
-
-        return $data;
+        
+        return null;
     }
 
     public function calculateWeight(){
