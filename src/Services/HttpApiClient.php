@@ -4,8 +4,8 @@ namespace Helte\DevTools\Services;
 
 use Exception;
 use GuzzleHttp\Exception\BadResponseException;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Client;
 
 class HttpApiClient {
     public static function call($endpoint, $method = 'GET', $body = [], $headers = [], $params = [], $http_errors = true, $body_type = 'json') {
@@ -82,16 +82,20 @@ class HttpApiClient {
         }
 
         try {
-            $response = Http::send($method, $endpoint . $query_string, $guzzle_options);
-            $response_situation = $response->status() < 400 ? 'SUCCESS' : 'ERROR';
+            $client = new Client($guzzle_options);
+
+            $response = $client->request($method, $endpoint . $query_string);
+
+            $response_situation = $response->getStatusCode() < 400 ? 'SUCCESS' : 'ERROR';
 
             if ($should_debug) {
                 $debug_log .= PHP_EOL . "---------- RESPONSE $response_situation ----------" . PHP_EOL . PHP_EOL;
                 $debug_log .= 'Status: ' . PHP_EOL;
-                $debug_log .= $response->status() . PHP_EOL;
+                $debug_log .= $response->getStatusCode() . PHP_EOL;
 
                 $debug_log .= 'Body: ' . PHP_EOL;
-                $response_body = $response->body();
+                $response_body = $response->getBody()->getContents();
+                $response->getBody()->rewind();
                 $debug_log .= (Json::isJson($response_body) ? Json::reencode($response_body) : $response_body);
             }
         }
@@ -108,7 +112,7 @@ class HttpApiClient {
 
             throw $e;
         }
-        catch (ConnectionException $e) {
+        catch (ConnectException $e) {
             $debug_log .= 'Could not connect to host';
         }
         finally {
