@@ -1,6 +1,6 @@
 <?php
 
-namespace Helte\DevTools\Services;
+namespace App\Services;
 
 class ElasticSearchQueryBuilder
 {
@@ -22,19 +22,21 @@ class ElasticSearchQueryBuilder
         return $this;
     }
 
+    public function range(string $field, string $operator, $value): self
+    {
+        $this->query['range'][$field][$operator] = $value;
+        return $this;
+    }
+
     public function bool(): self
     {
         $this->query['bool'] = [];
         return $this;
     }
 
-    public function addAggregation(string $name, string $type, string $field, array $aggregation = []): self
+    public function addAggregation(string $name, array $aggregation): self
     {
-        if(! empty($aggregation)){
-            $this->aggregations[$name]['aggs'] = $aggregation;
-            return $this;
-        }
-        $this->aggregations[$name]['aggs'] = [$type => ['field' => $field]];
+        $this->aggregations[$name] = $aggregation;
         return $this;
     }
 
@@ -81,26 +83,33 @@ class ElasticSearchQueryBuilder
             $query['query'] = $this->query;
         }
 
+        if(empty($this->query['bool'])){
+            unset($query['query']['bool']);
+        }
+
         $aggs = [];
         if (!empty($this->aggregations)) {
             $aggs['aggs'] = $this->aggregations;
         }
 
         $params = [];
-        if ($this->from !== null) {
-            $params['from'] = $this->from;
-        }
-        if ($this->size !== null) {
-            $params['size'] = $this->size;
-        }
-        if ($this->track_total_hits !== null) {
-            $params['track_total_hits'] = $this->track_total_hits;
-        }
 
         $finalQuery = array_merge($query, $aggs);
 
+        if ($this->size !== null) {
+            $finalQuery['size'] = $this->size;
+        }
+
+        if ($this->from !== null) {
+            $finalQuery['from'] = $this->from;
+        }
+
         if (!empty($params)) {
             $finalQuery['params'] = $params;
+        }
+
+        if ($this->track_total_hits !== null) {
+            $finalQuery['track_total_hits'] = $this->track_total_hits;
         }
 
         return $finalQuery;
