@@ -28,6 +28,12 @@ class ElasticSearchQueryBuilder
         return $this;
     }
 
+    public function custom(string $field, $value, string $type = 'match', string $operator = 'must'): self
+    {
+        $this->query['bool'][$operator][] = [$type => [$field => $value]];
+        return $this;
+    }
+
     public function bool(): self
     {
         $this->query['bool'] = [];
