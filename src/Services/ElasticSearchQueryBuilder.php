@@ -24,7 +24,7 @@ class ElasticSearchQueryBuilder
 
     public function range(string $field, string $operator, $value): self
     {
-        $this->query['range'][$field][$operator] = $value;
+        $this->query['bool']['must'][] = ['range' => [$field => [$operator => $value]]];
         return $this;
     }
 
@@ -94,24 +94,24 @@ class ElasticSearchQueryBuilder
 
         $params = [];
 
-        $finalQuery = array_merge($query, $aggs);
+        $final_query = array_merge($query, $aggs);
 
         if ($this->size !== null) {
-            $finalQuery['size'] = $this->size;
+            $final_query['size'] = $this->size;
         }
 
         if ($this->from !== null) {
-            $finalQuery['from'] = $this->from;
+            $final_query['from'] = $this->from;
         }
 
         if (!empty($params)) {
-            $finalQuery['params'] = $params;
+            $final_query['params'] = $params;
         }
 
         if ($this->track_total_hits !== null) {
-            $finalQuery['track_total_hits'] = $this->track_total_hits;
+            $final_query['track_total_hits'] = $this->track_total_hits;
         }
 
-        return $finalQuery;
+        return $final_query;
     }
 }
