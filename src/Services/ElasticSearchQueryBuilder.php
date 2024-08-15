@@ -37,6 +37,11 @@ class ElasticSearchQueryBuilder
     public function minimumShouldMatch(int $minimum_should_match): self
     {
         $this->query['bool']['minimum_should_match'] = $minimum_should_match;
+    }
+
+    public function custom(string $field, $value, string $type = 'match', string $operator = 'must'): self
+    {
+        $this->query['bool'][$operator][] = [$type => [$field => $value]];
         return $this;
     }
 
