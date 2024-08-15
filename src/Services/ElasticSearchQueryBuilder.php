@@ -34,6 +34,12 @@ class ElasticSearchQueryBuilder
         return $this;
     }
 
+    public function minimumShouldMatch(int $minimum_should_match): self
+    {
+        $this->query['bool']['minimum_should_match'] = $minimum_should_match;
+        return $this;
+    }
+
     public function addAggregation(string $name, array $aggregation): self
     {
         $this->aggregations[$name] = $aggregation;
