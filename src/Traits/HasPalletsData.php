@@ -19,7 +19,7 @@ trait HasPalletsData
     }
 
     public function calculatePalletsData(){
-        $module = $this->products()->where('category_id',2)->first();
+        $module = empty($this->id) ? $this->products->where('category_id',2)->first():  $this->products()->where('category_id',2)->first();
         if($module){
             $service = new PalletService();
 
