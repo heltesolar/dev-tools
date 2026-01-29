@@ -7,13 +7,13 @@ use Helte\DevTools\Models\Pallet;
 
 class PalletService{
 
-    public function calculatePalletsData($product_id,$pallets_data, $qtd){
+    public function calculatePalletsData($product_id,$pallets_data, $qtd, $is_solo_structure = false){
         if(is_null($pallets_data) || in_array(0, $pallets_data) || in_array(null,$pallets_data)){
             throw new Exception('Pallets Data inválido em produto: '.$product_id);
         }
         $pallets = $this->countByPallet($pallets_data, $qtd);
 
-        $area = $this->sumPalletsArea($pallets);
+        $area = $this->sumPalletsArea($pallets, $is_solo_structure, $qtd);
 
         $data = $this->renderPalletsData($pallets);
 
@@ -80,7 +80,7 @@ class PalletService{
         return $pallets->sortByDesc('size');
     }
 
-    public function sumPalletsArea($pallets){
+    public function sumPalletsArea($pallets, $is_solo_structure = false, $qtd = 0){
         $total_pallets = $pallets->sum('qtd');
 
         $should_stack = true;
@@ -102,7 +102,27 @@ class PalletService{
             }
         }
 
-        return ((float)($total_area/10000));
+        $area_in_meters = (float)($total_area/10000);
+        
+        if($is_solo_structure){
+            $additional_meters = $this->calculateSoloStructureMeters($qtd);
+            $area_in_meters += $additional_meters;
+        }
+
+        return $area_in_meters;
+    }
+
+    private function calculateSoloStructureMeters($qtd){
+        if($qtd <= 4){
+            return 0;
+        }
+        
+        if($qtd > 4 && $qtd <= 40){
+            return 4.8;
+        }
+        
+        $multiples = (int)($qtd / 40);
+        return $multiples * 4.8;
     }
 
     private function renderPalletsData($pallets){

@@ -22,8 +22,11 @@ trait HasPalletsData
         $module = $this->products()->where('category_id',2)->first();
         if($module){
             $service = new PalletService();
+            
+            $solo_product = empty($this->id) ? $this->products->where('category_id',10)->first() : $this->products()->where('category_id',10)->first();
+            $is_solo_structure = $solo_product !== null;       
 
-            return $service->calculatePalletsData($module->id, $module->pallets_data, $module->pivot->quantity);
+            return $service->calculatePalletsData($module->id, $module->pallets_data, $module->pivot->quantity, $is_solo_structure);
         }
         return null;
     }
